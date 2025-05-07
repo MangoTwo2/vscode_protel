@@ -1,50 +1,101 @@
-; PROTEL2 Sample File
-; This demonstrates the syntax highlighting capabilities
+SECTION PACKTA20 USES LSPATTAB, SYSINIT, STOR, PRRCSUTL, PAAKTA20, PABKTA20;                                                        
+$LI MODENTRY RESTART
+% EDITION AA01 (PATMSC228), DMSPL KSDOU.1 (2025/04/15 14:49:20) -- OPEN
 
-; Section declaration
-fast interface MySampleSection uses SomeOtherModule;
+DCL kta20_act_proc act_proc IS
+BLOCK
+  IF cond_unprotectds()
+  THEN
+    protectds();
+  ELSE
+    output_reply_msg('************************************************', essential_msg);
+    output_reply_msg('*** Image Dump in progress, patch could not  ***', essential_msg);
+    output_reply_msg('*** be activated                             ***', essential_msg);
+    output_reply_msg('************************************************', essential_msg);
+    RETURN FALSE;
+  ENDIF;
 
-; Type declarations
-type MyIntType int; ; A simple integer type
-type MyStructType class
-  data
-    field1: int;
-    field2: string;
-  operations
-    method (this) create;
-    method (this, value: int) setValue;
-    method (this) getValue -> int;
-endclass;
+  IF kta20_office_parms_bindings(ipl, bind_req)
+  THEN 
+    IF kta20_dnscrn_bindings(ipl, bind_req)
+    THEN
+      IF kta20_sipprof_bindings(ipl, bind_req)
+      THEN
+        IF kta20_emerg_policy_ftr_bindings(ipl, bind_req)
+        THEN
+          RETURN TRUE;
+        ELSE
+          IF kta20_sipprof_bindings(running, unbind_req) THEN ENDIF;
+          IF kta20_dnscrn_bindings(running, unbind_req) THEN ENDIF;
+          IF kta20_office_parms_bindings(running, unbind_req) THEN ENDIF;
+        ENDIF;
+      ELSE
+        IF kta20_dnscrn_bindings(running, unbind_req) THEN ENDIF;
+        IF kta20_office_parms_bindings(running, unbind_req) THEN ENDIF;
+      ENDIF;
+    ELSE
+      IF kta20_office_parms_bindings(running, unbind_req) THEN ENDIF;
+    ENDIF;
+  ENDIF;
 
-; Expression examples with IF/ELSEIF/ENDIF
-if x = 5 then
-  y := x + 10;
-  z := y * 2;
-elseif x > 10 then
-  y := x - 5;
-  z := y / 2;
-elseif x < 0 then
-  y := -x;
-  z := y + 10;
-else
-  y := 0;
-  z := 0;
-endif
+  RETURN FALSE;
 
-; Loop example
-for i := 1 to 10 do
-  someArray[i] := i * i;
-enddo
+ENDBLOCK;
 
-; Case statement
-case expression in
-  0: doSomething;
-  1: doSomethingElse;
-  2..5: doRangeAction;
-  else: doDefault;
-endcase
 
-; BNF Grammar notation example
-<sample-rule> ::= <term1> | <term2>
-<term1> ::= "literal" [<optional-part>]
-<term2> ::= <required-part> "end" 
+DCL kta20_deact_proc deact_proc IS
+BLOCK
+  IF cond_unprotectds()
+  THEN
+    protectds();
+  ELSE
+    output_reply_msg('************************************************', essential_msg);
+    output_reply_msg('*** Image Dump in progress, Patch could not  ***', essential_msg);
+    output_reply_msg('*** be de-activated                          ***', essential_msg);
+    output_reply_msg('************************************************', essential_msg);
+    RETURN FALSE;
+  ENDIF;
+
+  IF (^ kta20_dnscrn_bindings(running, unbind_req))
+  THEN
+    RETURN FALSE;
+  ENDIF;
+
+  IF (^ kta20_sipprof_bindings(running, unbind_req))
+  THEN
+    RETURN FALSE;
+  ENDIF;
+
+  IF kta20_emerg_policy_ftr_bindings(running, unbind_req) THEN ENDIF;
+
+  IF kta20_office_parms_bindings(running, unbind_req) THEN ENDIF;
+
+  RETURN TRUE;
+  
+ENDBLOCK;
+
+DCL paakta20_entry PROC() IS ENTRY;
+
+DCL paakta20_entry PROC() IS
+BLOCK
+  DCL rr restartreason INIT getrestart();
+  
+  IF rr = ipl
+  THEN
+    bind_actindex_proc(kta20_actindex,
+                       kta20_act_proc,
+                       kta20_deact_proc,
+                       TRUE); %password yes
+					
+    unprotectds();
+     real_bind_unbind_emerg_policy_pfe -> kta20_bind_unbind_emerg_policy_pfe;
+    protectds();
+
+  ELSEIF limited_patches[kta20_actindex]
+  THEN
+    IF kta20_office_parms_bindings(rr, bind_req) THEN ENDIF;
+    IF kta20_dnscrn_bindings(rr, bind_req) THEN ENDIF;	
+    IF kta20_sipprof_bindings(rr, bind_req) THEN ENDIF;
+    IF kta20_emerg_policy_ftr_bindings(rr, bind_req) THEN ENDIF;
+  ENDIF;									 		
+ENDBLOCK;

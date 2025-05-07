@@ -9,6 +9,9 @@
       "include": "#bnf-syntax"
     },
     {
+      "include": "#bnf-terminals"
+    },
+    {
       "include": "#strings"
     },
     {
@@ -52,6 +55,14 @@
         }
       ]
     },
+    "bnf-terminals": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.protel2",
+          "match": "\"[^\"]*\""
+        }
+      ]
+    },
     "strings": {
       "name": "string.quoted.double.protel2",
       "begin": "\"",
@@ -67,14 +78,14 @@
       "patterns": [
         {
           "name": "keyword.control.protel2",
-          "match": "\\b(case|endcase|in|do|enddo)\\b"
+          "match": "\\b(case|endcase|in|do|enddo|for|to)\\b"
         },
         {
           "name": "keyword.other.protel2",
-          "match": "\\b(interface|section|fast|perprocess|definitions|uses|of|type|class|abstract|method|operations|nil|round_up)\\b"
+          "match": "\\b(interface|section|fast|perprocess|definitions|uses|of|type|class|abstract|method|operations|nil|round_up|data|endclass|ptr|desc|upb|tdsize|mod|incl|notincl)\\b"
         },
         {
-          "name": "entity.name.type.protel2",
+          "name": "keyword.other.declaration.protel2",
           "match": "\\b(type)\\b"
         }
       ]
@@ -83,7 +94,7 @@
       "patterns": [
         {
           "name": "keyword.operator.protel2",
-          "match": "(->|\\+|-|\\*|\\/|<<|>>|=|\\^=|<|>|<=|>=|&|\\||!|\\bmod\\b|\\bincl\\b|\\bnotincl\\b|&:|\\|:|\\^|\\bptr\\b|\\bdesc\\b|\\bupb\\b|\\btdsize\\b)"
+          "match": "(->|\\+|-|\\*|\\/|<<|>>|=|\\^=|<|>|<=|>=|&|\\||!|\\bmod\\b|\\bincl\\b|\\bnotincl\\b|&:|\\|:|\\^|:=)"
         }
       ]
     },
@@ -92,6 +103,10 @@
         {
           "name": "support.type.protel2",
           "match": "\\b(any|class|inspect|operations|method|\\$classdesc|raise|retry|readable|writable|exclusive|rare|usual|create|fixed|overriding)\\b"
+        },
+        {
+          "name": "support.type.primitive.protel2",
+          "match": "\\b(int|string|float|double|boolean|char|byte|short|long)\\b"
         }
       ]
     },

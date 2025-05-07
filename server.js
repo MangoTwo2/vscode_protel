@@ -41,8 +41,8 @@ const PROTEL2_PATTERNS = {
   // Comments start with semicolon
   comment: /;.*/,
   
-  // Keywords from the grammar
-  keyword: /\b(interface|section|fast|perprocess|definitions|uses|of|type|class|abstract|if|then|endif|else|elseif|case|endcase|in|do|enddo|method|operations|nil|round_up)\b/,
+  // All keywords from the BNF
+  keyword: /\b(interface|section|fast|perprocess|definitions|uses|of|type|class|abstract|if|then|endif|else|elseif|case|endcase|in|do|enddo|method|operations|nil|round_up|data|endclass|for|to)\b/,
   
   // Control flow keywords with special highlighting
   controlFlow: {
@@ -50,14 +50,27 @@ const PROTEL2_PATTERNS = {
     then: /\b(then)\b/,
     elseif: /\b(elseif)\b/,
     else: /\b(else)\b/,
-    endif: /\b(endif)\b/
+    endif: /\b(endif)\b/,
+    for: /\b(for)\b/,
+    to: /\b(to)\b/,
+    do: /\b(do)\b/,
+    enddo: /\b(enddo)\b/,
+    case: /\b(case)\b/,
+    in: /\b(in)\b/,
+    endcase: /\b(endcase)\b/
   },
   
   // Special identifiers
   specialIdentifier: /\b(any|class|inspect|operations|method|\$classdesc|raise|retry|readable|writable|exclusive|rare|usual|create|fixed|overriding)\b/,
   
-  // Operators
-  operator: /(\->|\+|\-|\*|\/|<<|>>|=|\^=|<|>|<=|>=|&|\||!|mod|incl|notincl|&:|\|:|\^|ptr|desc|upb|tdsize)/,
+  // Type names
+  typeName: /\b(int|string|float|double|boolean|char|byte|short|long)\b/,
+  
+  // Operators from BNF (binary and unary)
+  operator: /(\->|\+|\-|\*|\/|<<|>>|=|\^=|<|>|<=|>=|&|\||!|mod|incl|notincl|&:|\|:|\^|ptr|desc|upb|tdsize|:=)/,
+  
+  // Punctuation
+  punctuation: /[,;:()[\]{}]/,
   
   // String literals
   string: /"[^"]*"/,
@@ -66,7 +79,10 @@ const PROTEL2_PATTERNS = {
   bnfSyntax: /(::=|\[|\]|\|)/,
   
   // Identifier (non-terminals in the BNF are represented in angle brackets)
-  nonTerminal: /<[a-zA-Z0-9\-_]+>/
+  nonTerminal: /<[a-zA-Z0-9\-_]+>/,
+  
+  // BNF quoted strings (representing terminal symbols)
+  bnfTerminal: /"[^"]*"/
 };
 
 // Initialize the server
@@ -105,6 +121,13 @@ connection.languages.semanticTokens.on(async ({ textDocument }) => {
       tokensBuilder.push(lineIndex, startChar, length, tokenTypes.indexOf('comment'), 0);
       // Skip further processing for this line if it's a comment
       if (startChar === 0) continue;
+    }
+
+    // Process BNF terminal symbols (keywords in quotes)
+    const bnfTerminalRegex = new RegExp(PROTEL2_PATTERNS.bnfTerminal, 'g');
+    let termMatch;
+    while ((termMatch = bnfTerminalRegex.exec(line)) !== null) {
+      tokensBuilder.push(lineIndex, termMatch.index, termMatch[0].length, tokenTypes.indexOf('string'), 0);
     }
 
     // Process BNF syntax elements
@@ -156,12 +179,61 @@ connection.languages.semanticTokens.on(async ({ textDocument }) => {
       tokensBuilder.push(lineIndex, endifMatch.index, endifMatch[0].length, tokenTypes.indexOf('keyword'), tokenModifiers.indexOf('static'));
     }
 
+    // DO keyword
+    let doMatch;
+    const doRegex = new RegExp(PROTEL2_PATTERNS.controlFlow.do, 'g');
+    while ((doMatch = doRegex.exec(line)) !== null) {
+      tokensBuilder.push(lineIndex, doMatch.index, doMatch[0].length, tokenTypes.indexOf('keyword'), tokenModifiers.indexOf('static'));
+    }
+
+    // ENDDO keyword
+    let enddoMatch;
+    const enddoRegex = new RegExp(PROTEL2_PATTERNS.controlFlow.enddo, 'g');
+    while ((enddoMatch = enddoRegex.exec(line)) !== null) {
+      tokensBuilder.push(lineIndex, enddoMatch.index, enddoMatch[0].length, tokenTypes.indexOf('keyword'), tokenModifiers.indexOf('static'));
+    }
+
+    // FOR keyword
+    let forMatch;
+    const forRegex = new RegExp(PROTEL2_PATTERNS.controlFlow.for, 'g');
+    while ((forMatch = forRegex.exec(line)) !== null) {
+      tokensBuilder.push(lineIndex, forMatch.index, forMatch[0].length, tokenTypes.indexOf('keyword'), tokenModifiers.indexOf('static'));
+    }
+
+    // TO keyword
+    let toMatch;
+    const toRegex = new RegExp(PROTEL2_PATTERNS.controlFlow.to, 'g');
+    while ((toMatch = toRegex.exec(line)) !== null) {
+      tokensBuilder.push(lineIndex, toMatch.index, toMatch[0].length, tokenTypes.indexOf('keyword'), tokenModifiers.indexOf('static'));
+    }
+
+    // CASE keyword
+    let caseMatch;
+    const caseRegex = new RegExp(PROTEL2_PATTERNS.controlFlow.case, 'g');
+    while ((caseMatch = caseRegex.exec(line)) !== null) {
+      tokensBuilder.push(lineIndex, caseMatch.index, caseMatch[0].length, tokenTypes.indexOf('keyword'), tokenModifiers.indexOf('static'));
+    }
+
+    // IN keyword
+    let inMatch;
+    const inRegex = new RegExp(PROTEL2_PATTERNS.controlFlow.in, 'g');
+    while ((inMatch = inRegex.exec(line)) !== null) {
+      tokensBuilder.push(lineIndex, inMatch.index, inMatch[0].length, tokenTypes.indexOf('keyword'), tokenModifiers.indexOf('static'));
+    }
+
+    // ENDCASE keyword
+    let endcaseMatch;
+    const endcaseRegex = new RegExp(PROTEL2_PATTERNS.controlFlow.endcase, 'g');
+    while ((endcaseMatch = endcaseRegex.exec(line)) !== null) {
+      tokensBuilder.push(lineIndex, endcaseMatch.index, endcaseMatch[0].length, tokenTypes.indexOf('keyword'), tokenModifiers.indexOf('static'));
+    }
+
     // Process remaining keywords (except those already processed in control flow)
     const keywordRegex = new RegExp(PROTEL2_PATTERNS.keyword, 'g');
     while ((match = keywordRegex.exec(line)) !== null) {
       // Skip if this keyword is a control flow keyword that was already processed
       const keyword = match[0].toLowerCase();
-      if (keyword === 'if' || keyword === 'then' || keyword === 'elseif' || keyword === 'else' || keyword === 'endif') {
+      if (/^(if|then|elseif|else|endif|do|enddo|for|to|case|in|endcase)$/.test(keyword)) {
         continue;
       }
       tokensBuilder.push(lineIndex, match.index, match[0].length, tokenTypes.indexOf('keyword'), 0);
@@ -173,16 +245,40 @@ connection.languages.semanticTokens.on(async ({ textDocument }) => {
       tokensBuilder.push(lineIndex, match.index, match[0].length, tokenTypes.indexOf('function'), 0);
     }
 
+    // Process type names
+    const typeNameRegex = new RegExp(PROTEL2_PATTERNS.typeName, 'g');
+    while ((match = typeNameRegex.exec(line)) !== null) {
+      tokensBuilder.push(lineIndex, match.index, match[0].length, tokenTypes.indexOf('type'), 0);
+    }
+
     // Process operators
     const operatorRegex = new RegExp(PROTEL2_PATTERNS.operator, 'g');
     while ((match = operatorRegex.exec(line)) !== null) {
       tokensBuilder.push(lineIndex, match.index, match[0].length, tokenTypes.indexOf('operator'), 0);
     }
 
+    // Process punctuation
+    const punctuationRegex = new RegExp(PROTEL2_PATTERNS.punctuation, 'g');
+    while ((match = punctuationRegex.exec(line)) !== null) {
+      tokensBuilder.push(lineIndex, match.index, match[0].length, tokenTypes.indexOf('operator'), 0);
+    }
+
     // Process string literals
     const stringRegex = new RegExp(PROTEL2_PATTERNS.string, 'g');
     while ((match = stringRegex.exec(line)) !== null) {
-      tokensBuilder.push(lineIndex, match.index, match[0].length, tokenTypes.indexOf('string'), 0);
+      // Skip if already processed as a BNF terminal
+      let alreadyProcessed = false;
+      const bnfTerminalRegex2 = new RegExp(PROTEL2_PATTERNS.bnfTerminal, 'g');
+      let termMatch2;
+      while ((termMatch2 = bnfTerminalRegex2.exec(line)) !== null) {
+        if (termMatch2.index === match.index) {
+          alreadyProcessed = true;
+          break;
+        }
+      }
+      if (!alreadyProcessed) {
+        tokensBuilder.push(lineIndex, match.index, match[0].length, tokenTypes.indexOf('string'), 0);
+      }
     }
   }
 

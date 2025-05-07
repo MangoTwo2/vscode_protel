@@ -1,7 +1,7 @@
 {
   "name": "protel2-language-server",
   "displayName": "PROTEL2 Language Support",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Language server for PROTEL2 syntax highlighting",
   "publisher": "protel2",
   "engines": {
