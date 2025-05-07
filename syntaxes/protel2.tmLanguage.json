@@ -1,0 +1,132 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "PROTEL2",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#bnf-syntax"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#if-control-structures"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#special-identifiers"
+    },
+    {
+      "include": "#non-terminals"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.semicolon.protel2",
+          "match": ";.*$"
+        }
+      ]
+    },
+    "bnf-syntax": {
+      "patterns": [
+        {
+          "name": "keyword.operator.bnf.protel2",
+          "match": "::="
+        },
+        {
+          "name": "keyword.operator.bnf.protel2",
+          "match": "\\|"
+        },
+        {
+          "name": "keyword.operator.bnf.optional.protel2",
+          "match": "\\[|\\]"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.protel2",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.protel2",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.protel2",
+          "match": "\\b(case|endcase|in|do|enddo)\\b"
+        },
+        {
+          "name": "keyword.other.protel2",
+          "match": "\\b(interface|section|fast|perprocess|definitions|uses|of|type|class|abstract|method|operations|nil|round_up)\\b"
+        },
+        {
+          "name": "entity.name.type.protel2",
+          "match": "\\b(type)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.protel2",
+          "match": "(->|\\+|-|\\*|\\/|<<|>>|=|\\^=|<|>|<=|>=|&|\\||!|\\bmod\\b|\\bincl\\b|\\bnotincl\\b|&:|\\|:|\\^|\\bptr\\b|\\bdesc\\b|\\bupb\\b|\\btdsize\\b)"
+        }
+      ]
+    },
+    "special-identifiers": {
+      "patterns": [
+        {
+          "name": "support.type.protel2",
+          "match": "\\b(any|class|inspect|operations|method|\\$classdesc|raise|retry|readable|writable|exclusive|rare|usual|create|fixed|overriding)\\b"
+        }
+      ]
+    },
+    "non-terminals": {
+      "patterns": [
+        {
+          "name": "entity.name.type.protel2",
+          "match": "<[a-zA-Z0-9\\-_]+>"
+        }
+      ]
+    },
+    "if-control-structures": {
+      "patterns": [
+        {
+          "name": "keyword.control.conditional.if.protel2",
+          "match": "\\b(if)\\b"
+        },
+        {
+          "name": "keyword.control.conditional.then.protel2",
+          "match": "\\b(then)\\b"
+        },
+        {
+          "name": "keyword.control.conditional.elseif.protel2",
+          "match": "\\b(elseif)\\b"
+        },
+        {
+          "name": "keyword.control.conditional.else.protel2",
+          "match": "\\b(else)\\b"
+        },
+        {
+          "name": "keyword.control.conditional.endif.protel2",
+          "match": "\\b(endif)\\b"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.protel2"
+} 

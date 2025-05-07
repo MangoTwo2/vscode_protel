@@ -1,0 +1,56 @@
+{
+  "name": "protel2-language-server",
+  "displayName": "PROTEL2 Language Support",
+  "version": "1.0.1",
+  "description": "Language server for PROTEL2 syntax highlighting",
+  "publisher": "protel2",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:protel2"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "protel2",
+        "aliases": [
+          "PROTEL2",
+          "protel2"
+        ],
+        "extensions": [
+          ".p2",
+          ".protel2",
+          ".yacc",
+          ".protel"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "protel2",
+        "scopeName": "source.protel2",
+        "path": "./syntaxes/protel2.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "start": "node server.js",
+    "package": "vsce package",
+    "publish": "vsce publish",
+    "patch": "npm version patch --no-git-tag-version",
+    "minor": "npm version minor --no-git-tag-version",
+    "major": "npm version major --no-git-tag-version",
+    "build": "npm run patch && npm run package"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^8.1.0",
+    "vscode-languageserver": "^8.1.0",
+    "vscode-languageserver-textdocument": "^1.0.8"
+  },
+  "devDependencies": {
+    "vsce": "^2.15.0"
+  }
+}

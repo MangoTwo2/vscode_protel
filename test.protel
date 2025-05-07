@@ -1,0 +1,101 @@
+SECTION PACKTA20 USES LSPATTAB, SYSINIT, STOR, PRRCSUTL, PAAKTA20, PABKTA20;                                                        
+$LI MODENTRY RESTART
+% EDITION AA01 (PATMSC228), DMSPL KSDOU.1 (2025/04/15 14:49:20) -- OPEN
+
+DCL kta20_act_proc act_proc IS
+BLOCK
+  IF cond_unprotectds()
+  THEN
+    protectds();
+  ELSE
+    output_reply_msg('************************************************', essential_msg);
+    output_reply_msg('*** Image Dump in progress, patch could not  ***', essential_msg);
+    output_reply_msg('*** be activated                             ***', essential_msg);
+    output_reply_msg('************************************************', essential_msg);
+    RETURN FALSE;
+  ENDIF;
+
+  IF kta20_office_parms_bindings(ipl, bind_req)
+  THEN 
+    IF kta20_dnscrn_bindings(ipl, bind_req)
+    THEN
+      IF kta20_sipprof_bindings(ipl, bind_req)
+      THEN
+        IF kta20_emerg_policy_ftr_bindings(ipl, bind_req)
+        THEN
+          RETURN TRUE;
+        ELSE
+          IF kta20_sipprof_bindings(running, unbind_req) THEN ENDIF;
+          IF kta20_dnscrn_bindings(running, unbind_req) THEN ENDIF;
+          IF kta20_office_parms_bindings(running, unbind_req) THEN ENDIF;
+        ENDIF;
+      ELSE
+        IF kta20_dnscrn_bindings(running, unbind_req) THEN ENDIF;
+        IF kta20_office_parms_bindings(running, unbind_req) THEN ENDIF;
+      ENDIF;
+    ELSE
+      IF kta20_office_parms_bindings(running, unbind_req) THEN ENDIF;
+    ENDIF;
+  ENDIF;
+
+  RETURN FALSE;
+
+ENDBLOCK;
+
+
+DCL kta20_deact_proc deact_proc IS
+BLOCK
+  IF cond_unprotectds()
+  THEN
+    protectds();
+  ELSE
+    output_reply_msg('************************************************', essential_msg);
+    output_reply_msg('*** Image Dump in progress, Patch could not  ***', essential_msg);
+    output_reply_msg('*** be de-activated                          ***', essential_msg);
+    output_reply_msg('************************************************', essential_msg);
+    RETURN FALSE;
+  ENDIF;
+
+  IF (^ kta20_dnscrn_bindings(running, unbind_req))
+  THEN
+    RETURN FALSE;
+  ENDIF;
+
+  IF (^ kta20_sipprof_bindings(running, unbind_req))
+  THEN
+    RETURN FALSE;
+  ENDIF;
+
+  IF kta20_emerg_policy_ftr_bindings(running, unbind_req) THEN ENDIF;
+
+  IF kta20_office_parms_bindings(running, unbind_req) THEN ENDIF;
+
+  RETURN TRUE;
+  
+ENDBLOCK;
+
+DCL paakta20_entry PROC() IS ENTRY;
+
+DCL paakta20_entry PROC() IS
+BLOCK
+  DCL rr restartreason INIT getrestart();
+  
+  IF rr = ipl
+  THEN
+    bind_actindex_proc(kta20_actindex,
+                       kta20_act_proc,
+                       kta20_deact_proc,
+                       TRUE); %password yes
+					
+    unprotectds();
+     real_bind_unbind_emerg_policy_pfe -> kta20_bind_unbind_emerg_policy_pfe;
+    protectds();
+
+  ELSEIF limited_patches[kta20_actindex]
+  THEN
+    IF kta20_office_parms_bindings(rr, bind_req) THEN ENDIF;
+    IF kta20_dnscrn_bindings(rr, bind_req) THEN ENDIF;	
+    IF kta20_sipprof_bindings(rr, bind_req) THEN ENDIF;
+    IF kta20_emerg_policy_ftr_bindings(rr, bind_req) THEN ENDIF;
+  ENDIF;									 		
+ENDBLOCK;
