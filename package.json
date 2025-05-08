@@ -1,7 +1,7 @@
 {
   "name": "protel2-language-server",
   "displayName": "PROTEL2 Language Support",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Language server for PROTEL2 syntax highlighting",
   "publisher": "protel2",
   "engines": {
@@ -22,7 +22,6 @@
         "extensions": [
           ".p2",
           ".protel2",
-          ".yacc",
           ".protel"
         ],
         "configuration": "./language-configuration.json"

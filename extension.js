@@ -26,7 +26,7 @@ function activate(context) {
   const clientOptions = {
     documentSelector: [{ scheme: 'file', language: 'protel2' }],
     synchronize: {
-      fileEvents: workspace.createFileSystemWatcher('**/*.{p2,protel2,yacc}')
+      fileEvents: workspace.createFileSystemWatcher('**/*.{protel,protel2}')
     }
   };
 
